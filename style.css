@@ -1,137 +1,172 @@
 :root {
-  --navy: #14213d;
-  --red: #c8352b;
-  --paper: #f7f7f4;
-  --steel: #5d6675;
-  --line: #d9dce1;
+  --moss: #1f3d2b;
+  --leaf: #3f7a4f;
+  --bloom: #6c63c9;
+  --chalk: #f9faf7;
+  --soil: #4a3b30;
+  --line: #dfe5dc;
+  --tint: #eaf0e6;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
-
 body {
-  font-family: "Karla", system-ui, sans-serif;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: var(--navy);
-  background: var(--paper);
+  font-family: "Nunito Sans", system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--soil);
+  background: var(--chalk);
+  padding-bottom: 6rem; /* место под панель корзины */
 }
 
-/* Hero: барбер-пол слева, текст справа */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+h1, h2, .name {
+  font-family: "Bricolage Grotesque", sans-serif;
+  color: var(--moss);
+  line-height: 1.1;
+}
+
+/* Hero */
 .hero {
-  display: grid;
-  grid-template-columns: 5rem 1fr;
-  min-height: 100svh;
+  background: var(--moss);
+  color: #e6efe3;
+  padding: clamp(3rem, 10vw, 6rem) 1.25rem;
 }
 
-.pole {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--red) 0 22px,
-    var(--paper) 22px 44px,
-    var(--navy) 44px 66px,
-    var(--paper) 66px 88px
-  );
-  background-size: 100% 88px;
-  animation: spin 3s linear infinite;
-}
+.hero > * { max-width: 42rem; margin-left: auto; margin-right: auto; }
 
-@keyframes spin {
-  to { background-position: 0 88px; }
-}
-
-.hero-text {
-  align-self: center;
-  padding: 2rem clamp(1.25rem, 6vw, 5rem);
-  max-width: 44rem;
-}
-
-.place { color: var(--steel); margin-bottom: 1rem; }
-
-h1, h2 {
-  font-family: "Archivo", sans-serif;
-  font-weight: 900;
-  font-stretch: 125%;
-  line-height: 1.05;
-}
-
-h1 {
-  font-size: clamp(3rem, 11vw, 7rem);
-  margin-bottom: 1.25rem;
-}
-
-.lead { max-width: 30rem; margin-bottom: 2rem; }
-
-.btn {
-  display: inline-block;
-  padding: 0.9rem 1.6rem;
-  background: var(--red);
+.hero h1 {
   color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: 4px;
+  font-weight: 800;
+  font-size: clamp(2.75rem, 10vw, 5.5rem);
+  margin-bottom: 1rem;
 }
 
-.btn:hover { background: #a82a21; }
-
-.link {
-  display: block;
-  margin-top: 1rem;
-  color: var(--navy);
-}
-
-a:focus-visible {
-  outline: 3px solid var(--navy);
-  outline-offset: 3px;
-}
-
-/* Общие блоки */
-.block {
-  max-width: 48rem;
+/* Каталог */
+.catalog {
+  max-width: 62rem;
   margin: 0 auto;
-  padding: 4rem 1.25rem;
-  border-top: 1px solid var(--line);
+  padding: 2rem 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.5rem;
 }
 
-h2 {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  margin-bottom: 1.75rem;
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.prices { list-style: none; }
+.photo {
+  aspect-ratio: 4 / 3;
+  background: var(--tint);
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+}
 
-.prices li {
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.card-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
+
+.name { font-size: 1.25rem; font-weight: 700; }
+.desc { font-size: 0.95rem; flex: 1; }
+.price { font-weight: 600; color: var(--bloom); }
+
+.qty { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+
+.qty button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--leaf);
+  background: #fff;
+  color: var(--leaf);
+  font-size: 1.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qty button:hover { background: var(--tint); }
+.qty output { min-width: 1.5rem; text-align: center; font-weight: 600; }
+
+/* Кнопки */
+.btn {
+  padding: 0.85rem 1.4rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--bloom);
+  color: #fff;
+  font: 600 1rem "Nunito Sans", sans-serif;
+  cursor: pointer;
+}
+
+.btn:hover { background: #564fb0; }
+.btn.ghost { background: transparent; color: var(--moss); border: 1px solid var(--moss); }
+.btn.ghost:hover { background: var(--tint); }
+
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--bloom);
+  outline-offset: 2px;
+}
+
+/* Панель корзины */
+.cartbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  padding: 0.9rem 0;
-  border-bottom: 1px dashed var(--line);
+  padding: 0.9rem 1.25rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 2px solid var(--moss);
 }
 
-.prices li span:last-child { font-weight: 600; white-space: nowrap; }
+.cartbar[hidden] { display: none; }
+.cartbar span { margin-left: 0.75rem; color: var(--bloom); font-weight: 600; }
 
-.facts { display: grid; gap: 1.25rem; }
-.facts strong { color: var(--red); }
+/* Окно заказа */
+dialog {
+  width: min(32rem, calc(100% - 2rem));
+  margin: auto;
+  padding: 1.5rem;
+  border: 0;
+  border-radius: 8px;
+  color: var(--soil);
+}
 
-.info { display: grid; grid-template-columns: 9rem 1fr; gap: 0.75rem 1rem; }
-.info dt { color: var(--steel); }
-.info a { color: var(--navy); }
+dialog::backdrop { background: rgba(31, 61, 43, 0.6); }
+
+dialog h2 { margin-bottom: 1rem; }
+
+dialog label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.95rem; }
+
+dialog input, dialog textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.hint { margin-top: 0.75rem; font-size: 0.9rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
 
 footer {
-  padding: 2rem 1.25rem;
   text-align: center;
-  color: var(--steel);
-  font-size: 0.95rem;
-}
-
-/* Мобильная версия */
-@media (max-width: 600px) {
-  .hero { grid-template-columns: 1.25rem 1fr; }
-  .info { grid-template-columns: 1fr; gap: 0.1rem; }
-  .info dd { margin-bottom: 0.9rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pole { animation: none; }
+  padding: 1.5rem 1.25rem;
+  font-size: 0.9rem;
 }
