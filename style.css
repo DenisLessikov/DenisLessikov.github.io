@@ -95,7 +95,7 @@ h1, h2, .name {
   background: var(--ink);
   color: #fff;
   font: 600 0.75rem "Sora", sans-serif;
-  letter-spacing: 0.04em;
+  letter-spacing: 3px;
   border-radius: 3px;
 }
 
