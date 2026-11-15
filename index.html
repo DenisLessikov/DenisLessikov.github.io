@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gortenzia Lab: саженцы цветов</title>
-  <meta name="description" content="Саженцы гортензий и других цветов. Выберите растения и отправьте заказ в Instagram.">
+  <meta name="description" content="Саженцы гортензий и других цветов. Выберите растения и отправьте заказ в Instagram, WhatsApp или Telegram.">
+  <!-- Предпросмотр ссылки в мессенджерах. Замени адрес на свой и положи картинку 1200x630 в img/og.jpg -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Gortenzia Lab: саженцы цветов">
+  <meta property="og:description" content="Каталог саженцев с ценами и наличием. Заказ в пару нажатий.">
+  <meta property="og:image" content="https://ВАШ-САЙТ.netlify.app/img/og.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,47 +17,70 @@
 </head>
 <body>
 
+  <div class="banner" id="banner" hidden></div>
+
   <header class="hero">
     <h1>Gortenzia Lab</h1>
-    <p>Саженцы гортензий и других цветов, выращенные и пересаженные вручную. Выберите растения, отправьте заказ в Instagram, мы подтвердим наличие и договоримся о выдаче.</p>
+    <p>Саженцы гортензий и других цветов, выращенные и пересаженные вручную. Выберите растения, отправьте заказ в мессенджер, мы подтвердим наличие и договоримся о выдаче.</p>
   </header>
 
   <main>
+    <div class="filters">
+      <input type="search" id="search" placeholder="Поиск по названию" aria-label="Поиск по названию">
+      <div class="chips" id="chips"></div>
+    </div>
     <h2 class="visually-hidden">Каталог саженцев</h2>
     <div class="catalog" id="catalog"></div>
+
+    <section class="reviews" id="reviews" hidden>
+      <h2>Отзывы покупателей</h2>
+      <div class="reviews-grid" id="reviewsGrid"></div>
+    </section>
   </main>
 
   <footer>
-    <p>Заказ подтверждается в личных сообщениях Instagram. Учебный проект.</p>
+    <p>Заказ подтверждается в личных сообщениях</p>
   </footer>
 
-  <!-- Нижняя панель корзины -->
   <div class="cartbar" id="cartbar" hidden>
-    <div>
-      <strong id="cartCount">0 шт.</strong>
-      <span id="cartTotal">0 ₸</span>
-    </div>
+    <div><strong id="cartCount">0 шт.</strong><span id="cartTotal">0 ₸</span></div>
     <button class="btn" id="openOrder" type="button">Оформить заказ</button>
   </div>
 
-  <!-- Окно заказа -->
+  <!-- Карточка товара -->
+  <dialog id="infoDialog">
+    <div id="infoBody"></div>
+    <button class="btn ghost" type="button" data-action="close" data-target="infoDialog">Закрыть</button>
+  </dialog>
+
+  <!-- Оформление заказа -->
   <dialog id="orderDialog">
     <h2>Ваш заказ</h2>
-    <label for="clientName">Как вас зовут (необязательно)</label>
-    <input id="clientName" type="text" autocomplete="name">
-    <label for="orderText">Текст заказа</label>
-    <textarea id="orderText" rows="8" readonly></textarea>
-    <p class="hint" id="orderHint">Нажмите «Отправить в Instagram»: текст заказа скопируется и откроется чат. Вставьте сообщение и отправьте.</p>
-    <div class="actions">
-      <button class="btn" id="sendOrder" type="button">Отправить в Instagram</button>
-      <button class="btn ghost" id="closeOrder" type="button">Назад к каталогу</button>
+    <div id="orderForm">
+      <label for="fName">Имя</label>
+      <input id="fName" type="text" autocomplete="name">
+      <label for="fPhone">Телефон (обязательно)</label>
+      <input id="fPhone" type="tel" autocomplete="tel">
+      <label for="fComment">Комментарий</label>
+      <input id="fComment" type="text">
     </div>
+    <label for="orderText">Текст заказа</label>
+    <textarea id="orderText" rows="7" readonly></textarea>
+    <p class="hint" id="deliveryNote"></p>
+    <p class="msg" id="orderMsg" role="status"></p>
+    <div class="actions">
+      <button class="btn" type="button" data-action="send" data-ch="ig">Instagram</button>
+      <button class="btn" type="button" data-action="send" data-ch="wa" id="btnWa">WhatsApp</button>
+      <button class="btn" type="button" data-action="send" data-ch="tg" id="btnTg">Telegram</button>
+      <button class="btn ghost" type="button" data-action="close" data-target="orderDialog">Назад</button>
+    </div>
+    <p class="hint"><a id="igLink" href="#" target="_blank" rel="noopener">Чат не открылся? Откройте Instagram вручную</a></p>
   </dialog>
 
   <!-- Скрытая форма: Netlify присылает копию заказа владельцу -->
   <form name="order" method="POST" data-netlify="true" hidden>
     <input type="hidden" name="form-name" value="order">
-    <input name="name">
+    <input name="name"><input name="phone"><input name="delivery"><input name="comment">
     <textarea name="order"></textarea>
   </form>
 

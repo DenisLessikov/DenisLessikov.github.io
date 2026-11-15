@@ -1,164 +1,224 @@
 // ===== НАСТРОЙКИ (меняй под клиента) =====
-const INSTAGRAM_USERNAME = "your_shop"; // ник продавца без @
-const CURRENCY = "₸";
+const CONFIG = {
+  instagram: "gortenziay_lab",   // ник без @
+  whatsapp: "87058002625",  // номер без + и пробелов; "" скрывает кнопку
+  telegram: "+7 705 800 26 25",             // ник без @; "" скрывает кнопку
+  currency: "₸",
+  minOrder: 1500,
+  deliveryNote: "Самовывоз бесплатно. Доставка по городу от 1 500 ₸, стоимость уточним в чате.",
+  //banner: "Весенняя акция: скидка 10% на пионы",  // "" скрывает баннер
+  sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWhXruKsNcUF1sOKi-tsGVGnGY96VNqgSx0djUTFgTRRiLECis7vPc72PgdEoKs2Xwsptz0W6BOVIW/pub?gid=86916318&single=true&output=csv"              // ссылка на опубликованный CSV Google Таблицы; "" = список ниже
+};
 
-// Товары. Фото: положи файлы в папку img/ и укажи путь, например "img/hortensia.jpg".
-// Если img пустое, показывается заглушка с эмодзи.
-const PRODUCTS = [
-  { id: "hortensia", name: "Гортензия метельчатая", desc: "Крупные белые соцветия, цветёт до осени. Саженец 2 года.", price: 3000, img: "", icon: "🌸" },
-  { id: "peony", name: "Пион красный", desc: "Махровый, морозостойкий. Корневая система закрытая.", price: 2500, img: "", icon: "🌺" },
-  { id: "rose", name: "Роза плетистая", desc: "Для арок и заборов, зимует под лёгким укрытием.", price: 3500, img: "", icon: "🌹" },
-  { id: "lavender", name: "Лаванда узколистная", desc: "Аромат, пчёлы, сухие букеты. Компактный куст.", price: 1200, img: "", icon: "🪻" },
-  { id: "phlox", name: "Флокс метельчатый", desc: "Цветёт всё лето, нетребователен к уходу.", price: 1500, img: "", icon: "🌼" },
-  { id: "iris", name: "Ирис бородатый", desc: "Смесь сортов, делёнки с хорошими корнями.", price: 1000, img: "", icon: "🌷" },
-  { id: "hosta", name: "Хоста пёстролистная", desc: "Для тени, декоративная листва.", price: 1800, img: "", icon: "🌿" },
-  { id: "clematis", name: "Клематис крупноцветковый", desc: "Лиана с цветами до 15 см в диаметре.", price: 3200, img: "", icon: "💜" }
+// Отзывы: скриншоты кладём в img/reviews/, например ["img/reviews/1.jpg"]
+const REVIEWS = [];
+
+// Статусы: in, preorder, soon, out
+const STATUS = { in: "В наличии", preorder: "Под заказ", soon: "Скоро", out: "Нет в наличии" };
+
+// Запасной список товаров (если таблица не подключена или недоступна)
+const P = (id, name, cat, desc, price, status, height, care, frost, icon) =>
+  ({ id, name, cat, desc, price, status, height, care, frost, icon, imgs: [] });
+
+let PRODUCTS = [
+  P("h1", "Гортензия метельчатая", "Гортензии", "Крупные белые соцветия, цветёт до осени.", 3000, "in", "до 1,5 м", "Солнце или полутень, кислая влажная почва", "до −35 °C", "🌸"),
+  P("h2", "Гортензия древовидная", "Гортензии", "Шаровидные соцветия, неприхотлива.", 2800, "in", "до 1,2 м", "Полутень, регулярный полив", "до −30 °C", "🤍"),
+  P("peony", "Пион красный", "Многолетники", "Махровый, закрытая корневая система.", 2500, "preorder", "до 80 см", "Солнце, не заглублять почку", "до −40 °C", "🌺"),
+  P("lav", "Лаванда узколистная", "Многолетники", "Аромат и сухие букеты, компактный куст.", 1200, "in", "до 50 см", "Солнце, лёгкая почва без застоя воды", "до −25 °C", "🪻"),
+  P("phlox", "Флокс метельчатый", "Многолетники", "Цветёт всё лето, нетребователен.", 1500, "in", "до 90 см", "Солнце или полутень, полив в жару", "до −35 °C", "🌼"),
+  P("iris", "Ирис бородатый", "Многолетники", "Смесь сортов, делёнки с хорошими корнями.", 1000, "soon", "до 70 см", "Солнце, корневище у поверхности", "до −30 °C", "🌷"),
+  P("rose", "Роза плетистая", "Кустарники и лианы", "Для арок и заборов.", 3500, "in", "до 3 м", "Солнце, укрытие на зиму", "до −25 °C с укрытием", "🌹"),
+  P("clem", "Клематис крупноцветковый", "Кустарники и лианы", "Цветы до 15 см в диаметре.", 3200, "out", "до 2,5 м", "Солнечная сторона, тень у корней", "до −30 °C", "💜")
 ];
 
-// ===== КОРЗИНА =====
+// ===== ПОМОЩНИКИ =====
+const el = (id) => document.getElementById(id);
+const money = (n) => n.toLocaleString("ru-RU") + " " + CONFIG.currency;
+const canBuy = (p) => p.status === "in" || p.status === "preorder";
+const items = () => PRODUCTS.filter(p => cart[p.id] > 0 && canBuy(p)).map(p => ({ ...p, qty: cart[p.id] }));
+const total = () => items().reduce((s, i) => s + i.qty * i.price, 0);
+
 let cart = {};
+try { cart = JSON.parse(localStorage.getItem("cart") || "{}"); } catch (e) { cart = {}; }
+const saveCart = () => { try { localStorage.setItem("cart", JSON.stringify(cart)); } catch (e) {} };
 
-try {
-  cart = JSON.parse(localStorage.getItem("cart") || "{}");
-} catch (e) {
-  cart = {};
-}
+const filter = { cat: "Все", q: "" };
 
-function saveCart() {
-  try {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  } catch (e) {
-    // хранилище недоступно: корзина просто не сохранится между визитами
+// ===== ЗАГРУЗКА ИЗ GOOGLE ТАБЛИЦЫ =====
+// Колонки: id, name, cat, desc, price, status, height, care, frost, icon, imgs (через |)
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else quoted = false; }
+      else cell += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c !== "\r") cell += c;
   }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  const head = rows.shift().map(h => h.trim());
+  return rows.filter(r => r.length > 1).map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] || "").trim()])));
 }
 
-function formatPrice(n) {
-  return n.toLocaleString("ru-RU") + " " + CURRENCY;
+async function loadSheet() {
+  try {
+    const rows = parseCSV(await (await fetch(CONFIG.sheetUrl)).text());
+    PRODUCTS = rows.map(r => ({
+      ...r, price: Number(r.price) || 0, status: STATUS[r.status] ? r.status : "in",
+      icon: r.icon || "🌿", imgs: r.imgs ? r.imgs.split("|") : []
+    }));
+  } catch (e) { /* остаётся запасной список */ }
 }
 
-function getItems() {
-  return PRODUCTS
-    .filter(p => cart[p.id] > 0)
-    .map(p => ({ ...p, qty: cart[p.id] }));
+// ===== КАТАЛОГ =====
+function renderChips() {
+  const cats = ["Все", ...new Set(PRODUCTS.map(p => p.cat))];
+  el("chips").innerHTML = cats.map(c =>
+    `<button type="button" class="chip" data-action="cat" data-cat="${c}" aria-pressed="${c === filter.cat}">${c}</button>`).join("");
 }
 
-// ===== ОТРИСОВКА =====
-const catalogEl = document.getElementById("catalog");
+function card(p) {
+  const n = PRODUCTS.indexOf(p) + 1;
+  const photo = p.imgs[0] ? `<img src="${p.imgs[0]}" alt="${p.name}" loading="lazy">` : `<span aria-hidden="true">${p.icon}</span>`;
+  const badge = p.status === "in" ? "" : `<span class="badge ${p.status}">${STATUS[p.status]}</span>`;
+  const ctrl = canBuy(p)
+    ? `<div class="qty">
+         <button type="button" data-action="minus" data-id="${p.id}" aria-label="Убрать: ${p.name}">−</button>
+         <output id="qty-${p.id}">${cart[p.id] || 0}</output>
+         <button type="button" data-action="plus" data-id="${p.id}" aria-label="Добавить: ${p.name}">+</button>
+       </div>`
+    : `<p class="unavailable">${STATUS[p.status]}</p>`;
+  return `<article class="card ${canBuy(p) ? "" : "off"}">
+    <div class="photo"><span class="code">GL-${String(n).padStart(2, "0")}</span>${badge}${photo}</div>
+    <div class="card-body">
+      <h3><button type="button" class="name" data-action="info" data-id="${p.id}">${p.name}</button></h3>
+      <p class="desc">${p.desc}</p>
+      <p class="price">${money(p.price)}</p>
+      ${ctrl}
+    </div></article>`;
+}
 
 function renderCatalog() {
-  catalogEl.innerHTML = PRODUCTS.map((p, i) => `
-    <article class="card">
-      <div class="photo">
-        <span class="code">GL-${String(i + 1).padStart(2, "0")}</span>
-        ${p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : `<span aria-hidden="true">${p.icon}</span>`}
-      </div>
-      <div class="card-body">
-        <h3 class="name">${p.name}</h3>
-        <p class="desc">${p.desc}</p>
-        <p class="price">${formatPrice(p.price)}</p>
-        <div class="qty">
-          <button type="button" data-action="minus" data-id="${p.id}" aria-label="Убрать одну штуку: ${p.name}">−</button>
-          <output id="qty-${p.id}">${cart[p.id] || 0}</output>
-          <button type="button" data-action="plus" data-id="${p.id}" aria-label="Добавить одну штуку: ${p.name}">+</button>
-        </div>
-      </div>
-    </article>
-  `).join("");
+  const q = filter.q.toLowerCase();
+  const list = PRODUCTS.filter(p =>
+    (filter.cat === "Все" || p.cat === filter.cat) && (p.name + " " + p.desc).toLowerCase().includes(q));
+  el("catalog").innerHTML = list.length ? list.map(card).join("")
+    : `<p class="empty">Ничего не найдено. Сбросьте поиск или выберите другую категорию.</p>`;
 }
 
 function updateBar() {
-  const items = getItems();
-  const count = items.reduce((sum, i) => sum + i.qty, 0);
-  const total = items.reduce((sum, i) => sum + i.qty * i.price, 0);
-
-  document.getElementById("cartbar").hidden = count === 0;
-  document.getElementById("cartCount").textContent = count + " шт.";
-  document.getElementById("cartTotal").textContent = formatPrice(total);
+  const list = items();
+  el("cartbar").hidden = list.length === 0;
+  el("cartCount").textContent = list.reduce((s, i) => s + i.qty, 0) + " шт.";
+  el("cartTotal").textContent = money(total());
 }
 
-catalogEl.addEventListener("click", (e) => {
-  const btn = e.target.closest("button[data-action]");
-  if (!btn) return;
+function openInfo(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  const pics = p.imgs.length ? p.imgs.map(s => `<img src="${s}" alt="${p.name}">`).join("") : `<div class="ph">${p.icon}</div>`;
+  el("infoBody").innerHTML = `
+    <div class="gallery">${pics}</div>
+    <h2>${p.name}</h2>
+    <p class="price">${money(p.price)} · ${STATUS[p.status]}</p>
+    <p>${p.desc}</p>
+    <dl class="specs">
+      <dt>Высота</dt><dd>${p.height || "-"}</dd>
+      <dt>Посадка и уход</dt><dd>${p.care || "-"}</dd>
+      <dt>Морозостойкость</dt><dd>${p.frost || "-"}</dd>
+    </dl>
+    ${canBuy(p) ? `<button class="btn" type="button" data-action="plus" data-id="${p.id}">Добавить в заказ</button>` : ""}`;
+  el("infoDialog").showModal();
+}
 
-  const id = btn.dataset.id;
-  const current = cart[id] || 0;
-  cart[id] = btn.dataset.action === "plus" ? current + 1 : Math.max(0, current - 1);
+// Один обработчик на все кнопки (делегирование событий)
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-action]");
+  if (!b) return;
+  const { action, id } = b.dataset;
 
-  document.getElementById("qty-" + id).textContent = cart[id];
-  saveCart();
-  updateBar();
+  if (action === "plus" || action === "minus") {
+    cart[id] = Math.max(0, (cart[id] || 0) + (action === "plus" ? 1 : -1));
+    const out = el("qty-" + id); if (out) out.textContent = cart[id];
+    saveCart(); updateBar();
+    if (b.closest("#infoDialog")) el("infoDialog").close();
+  } else if (action === "info") openInfo(id);
+  else if (action === "cat") { filter.cat = b.dataset.cat; renderChips(); renderCatalog(); }
+  else if (action === "close") el(b.dataset.target).close();
+  else if (action === "send") submit(b.dataset.ch);
 });
+
+el("search").addEventListener("input", (e) => { filter.q = e.target.value.trim(); renderCatalog(); });
 
 // ===== ЗАКАЗ =====
-const dialog = document.getElementById("orderDialog");
-const orderText = document.getElementById("orderText");
-const nameInput = document.getElementById("clientName");
-const hint = document.getElementById("orderHint");
+const val = (id) => el(id).value.trim();
+const msg = (t) => { el("orderMsg").textContent = t; };
 
-function buildOrderText() {
-  const items = getItems();
-  const total = items.reduce((sum, i) => sum + i.qty * i.price, 0);
-  const name = nameInput.value.trim();
-
-  const lines = items.map(i => `• ${i.name} × ${i.qty} = ${formatPrice(i.qty * i.price)}`);
-  const intro = name ? `Здравствуйте! Меня зовут ${name}. Хочу заказать:` : "Здравствуйте! Хочу заказать:";
-
-  return [intro, ...lines, `Итого: ${formatPrice(total)}`].join("\n");
+function orderText() {
+  const lines = items().map(i => `• ${i.name} × ${i.qty} = ${money(i.qty * i.price)}`);
+  return ["Здравствуйте! Хочу заказать:", ...lines, `Итого: ${money(total())}`,
+    val("fName") && `Имя: ${val("fName")}`,
+    val("fPhone") && `Телефон: ${val("fPhone")}`,
+    val("fComment") && `Комментарий: ${val("fComment")}`].filter(Boolean).join("\n");
 }
 
-document.getElementById("openOrder").addEventListener("click", () => {
-  orderText.value = buildOrderText();
-  dialog.showModal();
-});
+const refresh = () => { el("orderText").value = orderText(); };
+el("orderForm").addEventListener("input", refresh);
 
-nameInput.addEventListener("input", () => {
-  orderText.value = buildOrderText();
+el("openOrder").addEventListener("click", () => {
+  msg(""); refresh(); el("orderDialog").showModal();
 });
-
-document.getElementById("closeOrder").addEventListener("click", () => dialog.close());
 
 async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch (e) {
-    // запасной способ для старых браузеров
-    orderText.removeAttribute("readonly");
-    orderText.select();
-    const ok = document.execCommand("copy");
-    orderText.setAttribute("readonly", "");
-    return ok;
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (e) {
+    const t = el("orderText"); t.removeAttribute("readonly"); t.select();
+    const ok = document.execCommand("copy"); t.setAttribute("readonly", ""); return ok;
   }
 }
 
 // Копия заказа владельцу через форму Netlify (работает после деплоя на Netlify)
 function sendCopyToOwner(text) {
   const body = new URLSearchParams({
-    "form-name": "order",
-    name: nameInput.value.trim(),
-    order: text
+    "form-name": "order", name: val("fName"), phone: val("fPhone"),
+    comment: val("fComment"), order: text
   });
-
-  fetch("/", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: body.toString()
-  }).catch(() => {});
+  fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() }).catch(() => {});
 }
 
-document.getElementById("sendOrder").addEventListener("click", async () => {
-  const text = buildOrderText();
-  const copied = await copyText(text);
+function submit(channel) {
+  if (total() < CONFIG.minOrder) return msg(`Минимальная сумма заказа: ${money(CONFIG.minOrder)}.`);
+  if (val("fPhone").replace(/\D/g, "").length < 6) return msg("Укажите телефон, чтобы мы могли с вами связаться.");
 
+  const text = orderText();
   sendCopyToOwner(text);
 
-  hint.textContent = copied
-    ? "Заказ скопирован. Открываем чат: вставьте сообщение (долгое нажатие, «Вставить») и отправьте."
-    : "Не удалось скопировать автоматически. Выделите текст заказа выше, скопируйте его и вставьте в чат.";
-
-  window.open(`https://ig.me/m/${INSTAGRAM_USERNAME}`, "_blank", "noopener");
-});
+  if (channel === "wa") {
+    window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(text)}`, "_blank");
+    return msg("Открываем WhatsApp: сообщение уже заполнено, останется нажать «Отправить».");
+  }
+  // Instagram и Telegram: копируем и открываем чат сразу, в момент нажатия (иначе браузер блокирует окно)
+  const copying = copyText(text);
+  window.open(channel === "ig" ? `https://ig.me/m/${CONFIG.instagram}` : `https://t.me/${CONFIG.telegram}`, "_blank");
+  copying.then(ok => msg(ok
+    ? "Заказ скопирован. В чате вставьте сообщение (долгое нажатие, «Вставить») и отправьте."
+    : "Не удалось скопировать автоматически. Скопируйте текст заказа выше и вставьте в чат."));
+}
 
 // ===== СТАРТ =====
-renderCatalog();
-updateBar();
+if (CONFIG.banner) { el("banner").textContent = CONFIG.banner; el("banner").hidden = false; }
+el("deliveryNote").textContent = `Минимальный заказ: ${money(CONFIG.minOrder)}. ${CONFIG.deliveryNote}`;
+el("igLink").href = `https://ig.me/m/${CONFIG.instagram}`;
+el("btnWa").hidden = !CONFIG.whatsapp;
+el("btnTg").hidden = !CONFIG.telegram;
+
+if (REVIEWS.length) {
+  el("reviewsGrid").innerHTML = REVIEWS.map(s => `<img src="${s}" alt="Отзыв покупателя" loading="lazy">`).join("");
+  el("reviews").hidden = false;
+}
+
+const draw = () => { renderChips(); renderCatalog(); updateBar(); };
+draw();
+if (CONFIG.sheetUrl) loadSheet().then(draw);

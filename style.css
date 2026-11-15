@@ -50,7 +50,7 @@ h1, h2, .name {
   color: #fff;
   font-weight: 700;
   font-size: clamp(2.75rem, 11vw, 6.5rem);
-  letter-spacing: -0.03em;
+  letter-spacing: 3px;
   margin-bottom: 1.25rem;
 }
 
@@ -204,3 +204,44 @@ footer {
   font-size: 0.9rem;
   color: var(--muted);
 }
+
+/* ===== Баннер, фильтры ===== */
+.banner { background: var(--blue); color: #fff; text-align: center; padding: 0.6rem 1rem; font-weight: 600; font-size: 0.95rem; }
+.banner[hidden] { display: none; }
+
+.filters { max-width: 62rem; margin: 0 auto; padding: 1.5rem 1.25rem 0; display: grid; gap: 1rem; }
+.filters input[type="search"], dialog select {
+  width: 100%; max-width: 24rem; padding: 0.7rem; border: 1px solid var(--line);
+  border-radius: 6px; font: inherit; color: var(--ink); background: #fff;
+}
+dialog select { max-width: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip { padding: 0.5rem 1rem; border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 600 0.9rem "Public Sans", sans-serif; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.empty { grid-column: 1 / -1; color: var(--muted); }
+
+/* ===== Статусы и карточки ===== */
+.badge { position: absolute; top: 0.75rem; right: 0.75rem; padding: 0.15rem 0.6rem; border-radius: 3px; font: 600 0.75rem "Sora", sans-serif; background: #fff; color: var(--ink); border: 1px solid var(--ink); }
+.badge.preorder { background: var(--tint); }
+.card.off .photo > :not(.code):not(.badge) { opacity: 0.45; }
+.unavailable { margin-top: 0.6rem; font-weight: 700; color: var(--muted); }
+button.name { background: none; border: 0; padding: 0; text-align: left; color: var(--ink); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
+button.name:hover { text-decoration-color: var(--blue); }
+
+/* ===== Карточка товара ===== */
+.gallery { display: flex; gap: 0.5rem; overflow-x: auto; scroll-snap-type: x mandatory; margin-bottom: 1rem; }
+.gallery img, .gallery .ph { flex: 0 0 100%; scroll-snap-align: start; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: var(--tint); display: grid; place-items: center; font-size: 4rem; }
+#infoBody h2 { margin-bottom: 0.4rem; font-size: 1.5rem; }
+#infoBody .price { margin: 0 0 0.75rem; }
+.specs { display: grid; grid-template-columns: 9rem 1fr; gap: 0.4rem 1rem; margin: 1rem 0; font-size: 0.95rem; }
+.specs dt { color: var(--muted); }
+#infoDialog .btn { margin-right: 0.5rem; margin-top: 0.5rem; }
+
+/* ===== Заказ и отзывы ===== */
+.msg { margin-top: 0.75rem; font-weight: 600; color: var(--blue-dark); min-height: 1.5rem; }
+.actions .btn[hidden] { display: none; }
+.reviews { max-width: 62rem; margin: 0 auto; padding: 2rem 1.25rem; }
+.reviews[hidden] { display: none; }
+.reviews h2 { margin-bottom: 1.25rem; font-size: 1.75rem; }
+.reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 1rem; }
+.reviews-grid img { width: 100%; border: 1px solid var(--line); border-radius: 8px; }
