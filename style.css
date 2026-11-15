@@ -50,7 +50,7 @@ h1, h2, .name {
   color: #fff;
   font-weight: 700;
   font-size: clamp(2.75rem, 11vw, 6.5rem);
-  letter-spacing: -0.03em;
+  letter-spacing: 3px;
   margin-bottom: 1.25rem;
 }
 
@@ -95,7 +95,7 @@ h1, h2, .name {
   background: var(--ink);
   color: #fff;
   font: 600 0.75rem "Sora", sans-serif;
-  letter-spacing: 3px;
+  letter-spacing: 0.04em;
   border-radius: 3px;
 }
 
