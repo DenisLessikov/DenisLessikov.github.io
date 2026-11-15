@@ -46,9 +46,10 @@ function getItems() {
 const catalogEl = document.getElementById("catalog");
 
 function renderCatalog() {
-  catalogEl.innerHTML = PRODUCTS.map(p => `
+  catalogEl.innerHTML = PRODUCTS.map((p, i) => `
     <article class="card">
       <div class="photo">
+        <span class="code">GL-${String(i + 1).padStart(2, "0")}</span>
         ${p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : `<span aria-hidden="true">${p.icon}</span>`}
       </div>
       <div class="card-body">
